@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CamerasApp</string>
+    <string name="camera_type_cameras">Камеры</string>
+    <string name="camera_type_doors">Двери</string>
+</resources>
