@@ -51,7 +51,6 @@ import coil.compose.SubcomposeAsyncImage
 import com.android.cameras.app.App
 import com.android.cameras.app.R
 import com.android.cameras.app.di.injectedViewModel
-import com.android.cameras.app.domain.CameraModel
 import com.android.cameras.app.ui.theme.Preloader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -62,7 +61,7 @@ fun CamerasScreenHolder() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Yellow)
+            .background(Color.Gray)
     ) {
         val context = LocalContext.current.applicationContext
         val viewModel = injectedViewModel {
@@ -111,22 +110,26 @@ private fun CamerasList(state: CamerasState.Content) {
 @OptIn(ExperimentalWearMaterialApi::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
-private fun CamerasListItem(cameraModel: CameraModel) {
+private fun CamerasListItem(cameraModel: CameraUiModel) {
     val swipeableState = rememberSwipeableState(initialValue = 0)
     val scope = rememberCoroutineScope()
 
     SwappableItem(
         swipeableState = swipeableState
     ) {
-        FavoriteButtonIcon(scope = scope, swipeableState = swipeableState)
+        FavoriteButtonIcon(
+            cameraModel = cameraModel,
+            scope = scope,
+            swipeableState = swipeableState
+        )
         MainItem(cameraModel = cameraModel, swipeableState = swipeableState)
     }
 }
 
 @OptIn(ExperimentalWearMaterialApi::class)
 @Composable
-private fun BoxScope.MainItem(
-    cameraModel: CameraModel,
+private fun MainItem(
+    cameraModel: CameraUiModel,
     swipeableState: SwipeableState<Int>
 ) {
     Box(
@@ -142,9 +145,7 @@ private fun BoxScope.MainItem(
                 .clip(shape = RoundedCornerShape(5))
         ) {
             ImageItem(
-                imgUrl = cameraModel.imageUrl,
-                showRecIcon = cameraModel.rec,
-                isFavorite = cameraModel.favorites
+                cameraModel = cameraModel
             )
             TextItem(text = cameraModel.name)
         }
@@ -153,10 +154,15 @@ private fun BoxScope.MainItem(
 
 @OptIn(ExperimentalWearMaterialApi::class)
 @Composable
-fun BoxScope.FavoriteButtonIcon(scope: CoroutineScope, swipeableState: SwipeableState<Int>) {
+fun BoxScope.FavoriteButtonIcon(
+    cameraModel: CameraUiModel,
+    scope: CoroutineScope,
+    swipeableState: SwipeableState<Int>
+) {
     Icon(
-        painter = painterResource(id = R.drawable.baseline_star_full_24),
+        painter = painterResource(cameraModel.favoritesButtonIcon),
         contentDescription = null,
+        tint = cameraModel.favoritesIconColor,
         modifier = Modifier
             .align(Alignment.CenterEnd)
             .padding(end = 30.dp)
@@ -179,7 +185,7 @@ private fun SwappableItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(207.dp)
+            .height(279.dp)
             .swipeable(
                 state = swipeableState,
                 anchors = mapOf(
@@ -196,35 +202,31 @@ private fun SwappableItem(
 }
 
 @Composable
-private fun ImageItem(imgUrl: String, showRecIcon: Boolean, isFavorite: Boolean) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+private fun ImageItem(cameraModel: CameraUiModel) {
+    Box {
         SubcomposeAsyncImage(
-            model = imgUrl,
+            model = cameraModel.imageUrl,
             loading = { Preloader() },
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
-                .fillMaxSize()
-                .width(279.dp)
+                .fillMaxWidth()
                 .height(207.dp)
         )
 
-        if (showRecIcon) {
+        if (cameraModel.rec) {
             Icon(
-                painter = painterResource(id = R.drawable.rec_img),
+                painter = painterResource(id = cameraModel.recIcon),
                 contentDescription = null,
-                tint = Color.Red,
+                tint = cameraModel.recIconColor,
                 modifier = Modifier.padding(start = 8.dp, top = 8.dp)
             )
         }
-        if (isFavorite) {
+        if (cameraModel.favorites) {
             Icon(
-                painter = painterResource(id = R.drawable.baseline_star_full_24),
+                painter = painterResource(cameraModel.favoritesIcon),
                 contentDescription = null,
-                tint = Color.Yellow,
+                tint = cameraModel.favoritesIconColor,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(top = 3.dp, start = 306.dp)
@@ -242,7 +244,7 @@ private fun TextItem(text: String) {
         modifier = Modifier
             .height(72.dp)
             .fillMaxWidth()
-            .background(Color.White)
+            .background(Color.Green)
             .wrapContentHeight(align = Alignment.CenterVertically)
             .padding(start = 16.dp)
     )
@@ -253,32 +255,50 @@ private fun TextItem(text: String) {
 fun CamerasScreenPreview() {
     val items = hashMapOf(
         "room" to listOf(
-            CameraModel(
+            CameraUiModel(
                 id = 1L,
-                category = "Room",
-                name = "Name 1",
+                category = "Other",
+                name = "Test name",
                 favorites = true,
+                favoritesIcon = R.drawable.baseline_star_full_24,
+                favoritesIconColor = Color.Yellow,
                 rec = true,
+                recIcon = R.drawable.rec_img,
+                recIconColor = Color.Red,
+                favoritesButtonIcon = R.drawable.baseline_star_full_36,
+                favoritesButtonColor = Color.Yellow,
                 imageUrl = ""
             )
         ),
         "room" to listOf(
-            CameraModel(
-                id = 2L,
-                category = "Room",
-                name = "Name 2",
-                favorites = false,
-                rec = false,
+            CameraUiModel(
+                id = 1L,
+                category = "Other",
+                name = "Test name",
+                favorites = true,
+                favoritesIcon = R.drawable.baseline_star_full_24,
+                favoritesIconColor = Color.Yellow,
+                rec = true,
+                recIcon = R.drawable.rec_img,
+                recIconColor = Color.Red,
+                favoritesButtonIcon = R.drawable.baseline_star_full_36,
+                favoritesButtonColor = Color.Yellow,
                 imageUrl = ""
             )
         ),
         "room" to listOf(
-            CameraModel(
-                id = 3L,
-                category = "Room",
-                name = "Name 3",
+            CameraUiModel(
+                id = 1L,
+                category = "Other",
+                name = "Test name",
                 favorites = true,
+                favoritesIcon = R.drawable.baseline_star_full_24,
+                favoritesIconColor = Color.Yellow,
                 rec = true,
+                recIcon = R.drawable.rec_img,
+                recIconColor = Color.Red,
+                favoritesButtonIcon = R.drawable.baseline_star_full_36,
+                favoritesButtonColor = Color.Yellow,
                 imageUrl = ""
             )
         )

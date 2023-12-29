@@ -4,5 +4,5 @@ import com.android.cameras.app.domain.CameraModel
 
 sealed interface CamerasState {
     data object Loading : CamerasState
-    data class Content(val data: Map<String, List<CameraModel>>) : CamerasState
+    data class Content(val data: Map<String, List<CameraUiModel>>) : CamerasState
 }

@@ -12,7 +12,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class CamerasViewModel @AssistedInject constructor(
-    private val dataRepo: DataRepoImpl
+    private val dataRepo: DataRepoImpl,
+    private val camerasUiModelMapper: CamerasUiModelMapper
 ) : ViewModel() {
 
     private val _state = MutableLiveData<CamerasState>(CamerasState.Loading)
@@ -21,7 +22,8 @@ class CamerasViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             val dataDef = async(Dispatchers.IO) { dataRepo.findData() }
-            _state.value = CamerasState.Content(dataDef.await())
+            val data = camerasUiModelMapper(dataDef.await())
+            _state.value = CamerasState.Content(data)
         }
     }
 
