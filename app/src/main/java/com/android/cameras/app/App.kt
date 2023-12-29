@@ -2,7 +2,6 @@ package com.android.cameras.app
 
 import android.app.Application
 import com.android.cameras.app.di.AppComponent
-import com.android.cameras.app.di.BdModule
 import com.android.cameras.app.di.DaggerAppComponent
 
 class App : Application() {

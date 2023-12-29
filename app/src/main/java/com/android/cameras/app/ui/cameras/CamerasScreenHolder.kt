@@ -47,7 +47,6 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.SwipeableState
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
-import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.android.cameras.app.App
 import com.android.cameras.app.R

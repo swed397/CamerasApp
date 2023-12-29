@@ -5,8 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.data.DataRepoImpl
-import com.android.cameras.app.data.bd.BdRepoImpl
-import com.android.cameras.app.data.network.NetworkRepoImpl
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
