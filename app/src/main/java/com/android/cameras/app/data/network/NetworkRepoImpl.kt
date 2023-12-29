@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class NetworkRepoImpl @Inject constructor(private val httpClient: HttpClient) {
 
-    suspend fun getAllCameras(): Map<String, List<CameraModel>> = httpClient.get<NetworkModel> {
+    suspend fun getAllCameras(): List<CameraModel> = httpClient.get<NetworkModel> {
         url.takeFrom("$BASE_URL/cameras/")
     }.data.camerasList
         .map {
@@ -20,7 +20,12 @@ class NetworkRepoImpl @Inject constructor(private val httpClient: HttpClient) {
                 favorites = it.favorites,
                 rec = it.rec
             )
-        }.groupBy { it.category ?: "" }
+        }
+
+    suspend fun finAllIds(): List<Long> = httpClient.get<NetworkModel> {
+        url.takeFrom("$BASE_URL/cameras/")
+    }.data.camerasList.map { it.id }
+
 
     private companion object {
         const val BASE_URL = "https://cars.cprogroup.ru/api/rubetek"

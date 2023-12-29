@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("io.realm.kotlin")
 }
 
 android {
@@ -10,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.android.cameras.app"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -51,6 +52,8 @@ android {
 }
 
 dependencies {
+    implementation ("io.realm.kotlin:library-base:1.11.0")
+
     //LiveData
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
 
@@ -63,6 +66,7 @@ dependencies {
 
     //Dagger
     implementation("com.google.dagger:dagger:2.48.1")
+    implementation("androidx.wear.compose:compose-material:1.2.1")
     kapt("com.google.dagger:dagger-compiler:2.48.1")
 
     //Compose
@@ -77,6 +81,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material:1.5.4")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
