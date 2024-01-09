@@ -6,7 +6,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import javax.inject.Inject
 
-class BdRepoImpl @Inject constructor(private val realm: Realm) {
+class CamerasBdRepoImpl @Inject constructor(private val realm: Realm) {
 
     fun findAll(): List<CameraModel> = realm.query<CameraBdModel>().find().map {
         CameraModel(
@@ -34,6 +34,13 @@ class BdRepoImpl @Inject constructor(private val realm: Realm) {
                 }
                 copyToRealm(entity)
             }
+        }
+    }
+
+    suspend fun updateFavoriteCameraById(id: Long) {
+        realm.write {
+            val camera = query<CameraBdModel>("apiId == $0", id).find().first()
+            camera.favorites = camera.favorites.not()
         }
     }
 }

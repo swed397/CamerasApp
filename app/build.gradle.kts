@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    //realm
     implementation ("io.realm.kotlin:library-base:1.11.0")
 
     //LiveData

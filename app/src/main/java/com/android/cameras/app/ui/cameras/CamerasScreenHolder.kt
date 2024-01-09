@@ -71,17 +71,34 @@ fun CamerasScreenHolder() {
 
         Box(modifier = Modifier.fillMaxSize()) {
             when (val currentState = state) {
-                is CamerasState.Content -> CamerasList(state = currentState)
+                is CamerasState.Content -> CamerasList(
+                    state = currentState,
+                    onChangeFavorite = viewModel::updateFavoriteCameraById
+                )
+
                 is CamerasState.Loading -> Preloader(modifier = Modifier.align(Alignment.Center))
+                is CamerasState.Error -> Error(currentState.error)
                 else -> {}
             }
         }
     }
 }
 
+@Composable
+fun Error(error: String) {
+    Text(
+        text = error,
+        textAlign = TextAlign.Center,
+        fontSize = 17.sp,
+    )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CamerasList(state: CamerasState.Content) {
+private fun CamerasList(
+    state: CamerasState.Content,
+    onChangeFavorite: (id: Long, key: String) -> Unit,
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -101,7 +118,7 @@ private fun CamerasList(state: CamerasState.Content) {
             }
 
             items(data, key = { it.id }) {
-                CamerasListItem(cameraModel = it)
+                CamerasListItem(cameraModel = it, onChangeFavorite = onChangeFavorite)
             }
         }
     }
@@ -110,7 +127,10 @@ private fun CamerasList(state: CamerasState.Content) {
 @OptIn(ExperimentalWearMaterialApi::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
-private fun CamerasListItem(cameraModel: CameraUiModel) {
+private fun CamerasListItem(
+    cameraModel: CameraUiModel,
+    onChangeFavorite: (id: Long, key: String) -> Unit,
+) {
     val swipeableState = rememberSwipeableState(initialValue = 0)
     val scope = rememberCoroutineScope()
 
@@ -119,6 +139,7 @@ private fun CamerasListItem(cameraModel: CameraUiModel) {
     ) {
         FavoriteButtonIcon(
             cameraModel = cameraModel,
+            onChangeFavorite = onChangeFavorite,
             scope = scope,
             swipeableState = swipeableState
         )
@@ -156,6 +177,7 @@ private fun MainItem(
 @Composable
 fun BoxScope.FavoriteButtonIcon(
     cameraModel: CameraUiModel,
+    onChangeFavorite: (id: Long, key: String) -> Unit,
     scope: CoroutineScope,
     swipeableState: SwipeableState<Int>
 ) {
@@ -165,18 +187,18 @@ fun BoxScope.FavoriteButtonIcon(
         tint = cameraModel.favoritesIconColor,
         modifier = Modifier
             .align(Alignment.CenterEnd)
-            .padding(end = 30.dp)
             .border(
                 border = BorderStroke(1.dp, Color.Black),
                 shape = RoundedCornerShape(50)
             )
             .clickable {
                 scope.launch { swipeableState.animateTo(0, tween(500, 0)) }
+                onChangeFavorite.invoke(cameraModel.id, cameraModel.category)
             }
     )
 }
 
-@OptIn(ExperimentalWearMaterialApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalWearMaterialApi::class)
 @Composable
 private fun SwappableItem(
     swipeableState: SwipeableState<Int>,
@@ -184,7 +206,7 @@ private fun SwappableItem(
 ) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(333.dp)
             .height(279.dp)
             .swipeable(
                 state = swipeableState,
@@ -303,7 +325,7 @@ fun CamerasScreenPreview() {
             )
         )
     )
-    CamerasList(state = CamerasState.Content(items))
+    CamerasList(state = CamerasState.Content(items), onChangeFavorite = { _, _ -> })
 }
 
 private fun dipToPx(context: Context, dpValue: Float) =
