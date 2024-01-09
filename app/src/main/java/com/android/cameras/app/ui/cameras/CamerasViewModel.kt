@@ -1,20 +1,16 @@
 package com.android.cameras.app.ui.cameras
 
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
 import com.android.cameras.app.data.DataRepoImpl
-import com.android.cameras.app.ui.theme.Preloader
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.lang.RuntimeException
 
 class CamerasViewModel @AssistedInject constructor(
     private val dataRepo: DataRepoImpl,
