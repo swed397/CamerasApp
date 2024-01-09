@@ -1,12 +1,12 @@
 package com.android.cameras.app.data
 
 import com.android.cameras.app.data.bd.CamerasBdRepoImpl
-import com.android.cameras.app.data.network.NetworkRepoImpl
+import com.android.cameras.app.data.network.CamerasNetworkRepoImpl
 import com.android.cameras.app.domain.CameraModel
 import javax.inject.Inject
 
-class DataRepoImpl @Inject constructor(
-    private val networkRepo: NetworkRepoImpl,
+class CamerasDataRepoImpl @Inject constructor(
+    private val networkRepo: CamerasNetworkRepoImpl,
     private val bdRepo: CamerasBdRepoImpl
 ) {
 
@@ -27,7 +27,11 @@ class DataRepoImpl @Inject constructor(
     }
 
     suspend fun getAllData(): List<CameraModel> =
-        bdRepo.findAll().ifEmpty { networkRepo.getAllCameras() }
+        bdRepo.findAll().ifEmpty {
+            val data = networkRepo.getAllCameras()
+            bdRepo.saveAll(data)
+            data
+        }
 
     suspend fun updateFavoriteCameraById(id: Long) {
         bdRepo.updateFavoriteCameraById(id)

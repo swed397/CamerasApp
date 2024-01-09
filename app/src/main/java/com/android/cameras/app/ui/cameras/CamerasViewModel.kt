@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
-import com.android.cameras.app.data.DataRepoImpl
+import com.android.cameras.app.data.CamerasDataRepoImpl
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +13,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class CamerasViewModel @AssistedInject constructor(
-    private val dataRepo: DataRepoImpl,
+    private val dataRepo: CamerasDataRepoImpl,
     private val camerasUiModelMapper: CamerasUiModelMapper
 ) : ViewModel() {
 

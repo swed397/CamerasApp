@@ -6,7 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.http.takeFrom
 import javax.inject.Inject
 
-class NetworkRepoImpl @Inject constructor(private val httpClient: HttpClient) {
+class CamerasNetworkRepoImpl @Inject constructor(private val httpClient: HttpClient) {
 
     suspend fun getAllCameras(): List<CameraModel> = httpClient.get<NetworkModel> {
         url.takeFrom("$BASE_URL/cameras/")
