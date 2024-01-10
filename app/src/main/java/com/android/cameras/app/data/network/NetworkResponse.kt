@@ -2,7 +2,7 @@ package com.android.cameras.app.data.network
 
 import com.google.gson.annotations.SerializedName
 
-data class NetworkModel(
+data class CamerasNetworkModel(
 
     @SerializedName("data")
     val data: CameraData
@@ -37,3 +37,27 @@ data class Camera(
     @SerializedName("rec")
     val rec: Boolean
 )
+
+data class DoorsNetworkModel(
+
+    @SerializedName("data")
+    val data: List<Doors>
+)
+
+data class Doors(
+    @SerializedName("name")
+    val name: String,
+
+    @SerializedName("room")
+    val room: String?,
+
+    @SerializedName("id")
+    val id: Long,
+
+    @SerializedName("favorites")
+    val favorites: Boolean,
+
+    @SerializedName("snapshot")
+    val imgUrl: String?,
+)
+

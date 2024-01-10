@@ -1,6 +1,7 @@
 package com.android.cameras.app.di
 
-import com.android.cameras.app.data.bd.model.CameraBdModel
+import com.android.cameras.app.data.bd.model.CameraDbModel
+import com.android.cameras.app.data.bd.model.DoorDbModel
 import dagger.Module
 import dagger.Provides
 import io.realm.kotlin.Realm
@@ -13,7 +14,9 @@ class BdModule {
     @Provides
     @Singleton
     fun provideRealm(): Realm {
-        val config = RealmConfiguration.Builder(schema = setOf(CameraBdModel::class)).build()
+        val config = RealmConfiguration
+            .Builder(schema = setOf(CameraDbModel::class, DoorDbModel::class))
+            .build()
 
         return Realm.open(config)
     }

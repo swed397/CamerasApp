@@ -1,7 +1,6 @@
 package com.android.cameras.app.ui.cameras
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -50,6 +49,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.android.cameras.app.App
 import com.android.cameras.app.R
 import com.android.cameras.app.di.injectedViewModel
+import com.android.cameras.app.dipToPx
 import com.android.cameras.app.ui.theme.Preloader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -326,6 +326,3 @@ fun CamerasScreenPreview() {
     )
     CamerasList(state = CamerasState.Content(items), onChangeFavorite = { _, _ -> })
 }
-
-private fun dipToPx(context: Context, dpValue: Float) =
-    dpValue * context.resources.displayMetrics.density

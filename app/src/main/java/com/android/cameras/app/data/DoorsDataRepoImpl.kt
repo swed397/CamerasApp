@@ -3,9 +3,10 @@ package com.android.cameras.app.data
 import com.android.cameras.app.data.bd.DbRepoImpl
 import com.android.cameras.app.data.network.NetworkRepoImpl
 import com.android.cameras.app.domain.CameraModel
+import com.android.cameras.app.domain.DoorModel
 import javax.inject.Inject
 
-class CamerasDataRepoImpl @Inject constructor(
+class DoorsDataRepoImpl @Inject constructor(
     private val networkRepo: NetworkRepoImpl,
     private val bdRepo: DbRepoImpl
 ) {
@@ -26,16 +27,20 @@ class CamerasDataRepoImpl @Inject constructor(
         }
     }
 
-    suspend fun getAllData(): List<CameraModel> = bdRepo.findAllCameras()
+    suspend fun getAllData(): List<DoorModel> = bdRepo.findAllDoors()
 
     suspend fun populateBdData() {
-        bdRepo.findAllCameras().ifEmpty {
-            val data = networkRepo.getAllCameras()
-            bdRepo.saveAllCameras(data)
+        bdRepo.findAllDoors().ifEmpty {
+            val data = networkRepo.getAllDoors()
+            bdRepo.saveAllDoors(data)
         }
     }
 
-    suspend fun updateFavoriteCameraById(id: Long) {
-        bdRepo.updateFavoriteCameraById(id)
+    suspend fun updateFavoriteDoorById(id: Long) {
+        bdRepo.updateFavoriteDoorById(id)
+    }
+
+    suspend fun updateNameDoorById(id: Long, name: String) {
+        bdRepo.updateNameDoorById(id, name)
     }
 }
