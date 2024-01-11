@@ -2,7 +2,6 @@ package com.android.cameras.app.data
 
 import com.android.cameras.app.data.bd.DbRepoImpl
 import com.android.cameras.app.data.network.NetworkRepoImpl
-import com.android.cameras.app.domain.CameraModel
 import com.android.cameras.app.domain.DoorModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch

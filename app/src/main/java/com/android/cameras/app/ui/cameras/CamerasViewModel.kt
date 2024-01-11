@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
 import com.android.cameras.app.data.CamerasDataRepoImpl
-import com.android.cameras.app.ui.doors.DoorsState
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -24,11 +23,10 @@ class CamerasViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             async(Dispatchers.IO) {
-                val data = dataRepo.getAllData()
-                camerasUiModelMapper(data)
+                dataRepo.getAllData()
             }.apply {
                 try {
-                    _state.value = CamerasState.Content(this.await())
+                    _state.value = CamerasState.Content(camerasUiModelMapper(this.await()))
                 } catch (e: RuntimeException) {
                     _state.value = CamerasState.Error(e.message ?: "Something goes wrong")
                 }

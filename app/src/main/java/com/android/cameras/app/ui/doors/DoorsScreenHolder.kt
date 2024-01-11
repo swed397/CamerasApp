@@ -63,7 +63,6 @@ import com.android.cameras.app.App
 import com.android.cameras.app.R
 import com.android.cameras.app.di.injectedViewModel
 import com.android.cameras.app.dipToPx
-import com.android.cameras.app.ui.cameras.CamerasState
 import com.android.cameras.app.ui.theme.CircleIcon
 import com.android.cameras.app.ui.theme.ErrorWindow
 import com.android.cameras.app.ui.theme.Preloader
