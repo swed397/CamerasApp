@@ -4,6 +4,8 @@ import com.android.cameras.app.data.bd.DbRepoImpl
 import com.android.cameras.app.data.network.NetworkRepoImpl
 import com.android.cameras.app.domain.CameraModel
 import com.android.cameras.app.domain.DoorModel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class DoorsDataRepoImpl @Inject constructor(
@@ -11,18 +13,26 @@ class DoorsDataRepoImpl @Inject constructor(
     private val bdRepo: DbRepoImpl
 ) {
 
-    suspend fun refreshData(): List<CameraModel> {
-        val bdData = bdRepo.findAllCameras()
+    suspend fun refreshData(): List<DoorModel> {
+        val bdData = bdRepo.findAllDoors()
 
         return if (bdData.isEmpty()) {
-            val newData = networkRepo.getAllCameras()
-            bdRepo.saveAllCameras(newData)
+            val newData = networkRepo.getAllDoors()
+            coroutineScope {
+                launch {
+                    bdRepo.saveAllDoors(newData)
+                }
+            }
             newData
         } else {
-            val apiData = networkRepo.getAllCameras()
-            val bdIds = bdRepo.findAllCamerasIds()
+            val apiData = networkRepo.getAllDoors()
+            val bdIds = bdRepo.findAllDoorsIds()
             val newData = apiData.filter { bdIds.contains(it.id).not() }
-            bdRepo.saveAllCameras(newData)
+            coroutineScope {
+                launch {
+                    bdRepo.saveAllDoors(newData)
+                }
+            }
             bdData + newData
         }
     }

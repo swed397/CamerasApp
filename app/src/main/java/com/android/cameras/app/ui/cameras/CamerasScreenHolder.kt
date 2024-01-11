@@ -2,11 +2,8 @@ package com.android.cameras.app.ui.cameras
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +19,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,10 +31,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,17 +52,21 @@ import com.android.cameras.app.App
 import com.android.cameras.app.R
 import com.android.cameras.app.di.injectedViewModel
 import com.android.cameras.app.dipToPx
+import com.android.cameras.app.ui.doors.DoorsState
+import com.android.cameras.app.ui.theme.CircleIcon
+import com.android.cameras.app.ui.theme.ErrorWindow
 import com.android.cameras.app.ui.theme.Preloader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CamerasScreenHolder() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Gray)
+            .background(colorResource(id = R.color.light_grey))
     ) {
         val context = LocalContext.current.applicationContext
         val viewModel = injectedViewModel {
@@ -68,28 +74,42 @@ fun CamerasScreenHolder() {
         }
         val state by viewModel.state.observeAsState()
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = state is CamerasState.Refresh,
+            onRefresh = viewModel::refreshData
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
+
+        ) {
             when (val currentState = state) {
                 is CamerasState.Content -> CamerasList(
                     state = currentState,
                     onChangeFavorite = viewModel::updateFavoriteCameraById
                 )
 
-                is CamerasState.Loading -> Preloader(modifier = Modifier.align(Alignment.Center))
-                is CamerasState.Error -> Error(currentState.error)
+                is CamerasState.Loading -> Preloader(
+                    modifier = Modifier.align(
+                        Alignment.Center
+                    )
+                )
+
+                is CamerasState.Error -> ErrorWindow(error = currentState.error)
+                is CamerasState.Refresh -> {}
+
                 else -> {}
             }
+
+            PullRefreshIndicator(
+                refreshing = state is CamerasState.Refresh,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
         }
     }
-}
-
-@Composable
-fun Error(error: String) {
-    Text(
-        text = error,
-        textAlign = TextAlign.Center,
-        fontSize = 17.sp,
-    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -111,7 +131,7 @@ private fun CamerasList(
                     fontSize = 21.sp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
+                        .background(colorResource(id = R.color.light_grey))
                         .padding(top = 10.dp, start = 21.dp),
                 )
             }
@@ -156,14 +176,14 @@ private fun MainItem(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .offset { IntOffset(swipeableState.offset.value.roundToInt(), 0) }
-            .fillMaxSize()
+            .width(333.dp)
+            .height(279.dp)
+            .shadow(
+                elevation = 10.dp,
+                shape = RoundedCornerShape(5)
+            )
     ) {
-        Column(
-            modifier = Modifier
-                .width(333.dp)
-                .height(279.dp)
-                .clip(shape = RoundedCornerShape(5))
-        ) {
+        Column {
             ImageItem(
                 cameraModel = cameraModel
             )
@@ -180,20 +200,15 @@ fun BoxScope.FavoriteButtonIcon(
     scope: CoroutineScope,
     swipeableState: SwipeableState<Int>
 ) {
-    Icon(
-        painter = painterResource(cameraModel.favoritesButtonIcon),
-        contentDescription = null,
-        tint = cameraModel.favoritesIconColor,
+    CircleIcon(
+        icon = painterResource(cameraModel.favoritesButtonIcon),
+        iconColor = cameraModel.favoritesIconColor,
+        onClickable = {
+            scope.launch { swipeableState.animateTo(0, tween(500, 0)) }
+            onChangeFavorite.invoke(cameraModel.id, cameraModel.category)
+        },
         modifier = Modifier
             .align(Alignment.CenterEnd)
-            .border(
-                border = BorderStroke(1.dp, Color.Black),
-                shape = RoundedCornerShape(50)
-            )
-            .clickable {
-                scope.launch { swipeableState.animateTo(0, tween(500, 0)) }
-                onChangeFavorite.invoke(cameraModel.id, cameraModel.category)
-            }
     )
 }
 
@@ -265,7 +280,7 @@ private fun TextItem(text: String) {
         modifier = Modifier
             .height(72.dp)
             .fillMaxWidth()
-            .background(Color.Green)
+            .background(colorResource(id = R.color.white))
             .wrapContentHeight(align = Alignment.CenterVertically)
             .padding(start = 16.dp)
     )
@@ -286,7 +301,7 @@ fun CamerasScreenPreview() {
                 rec = true,
                 recIcon = R.drawable.rec_img,
                 recIconColor = Color.Red,
-                favoritesButtonIcon = R.drawable.baseline_star_full_36,
+                favoritesButtonIcon = R.drawable.baseline_star_full_20,
                 favoritesButtonColor = Color.Yellow,
                 imageUrl = ""
             )
@@ -302,7 +317,7 @@ fun CamerasScreenPreview() {
                 rec = true,
                 recIcon = R.drawable.rec_img,
                 recIconColor = Color.Red,
-                favoritesButtonIcon = R.drawable.baseline_star_full_36,
+                favoritesButtonIcon = R.drawable.baseline_star_full_20,
                 favoritesButtonColor = Color.Yellow,
                 imageUrl = ""
             )
@@ -318,7 +333,7 @@ fun CamerasScreenPreview() {
                 rec = true,
                 recIcon = R.drawable.rec_img,
                 recIconColor = Color.Red,
-                favoritesButtonIcon = R.drawable.baseline_star_full_36,
+                favoritesButtonIcon = R.drawable.baseline_star_full_20,
                 favoritesButtonColor = Color.Yellow,
                 imageUrl = ""
             )

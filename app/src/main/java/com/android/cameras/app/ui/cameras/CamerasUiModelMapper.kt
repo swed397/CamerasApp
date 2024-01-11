@@ -19,7 +19,7 @@ class CamerasUiModelMapper @Inject constructor() {
                 rec = it.rec,
                 recIcon = R.drawable.rec_img,
                 recIconColor = Color.Red,
-                favoritesButtonIcon = if (it.favorites) R.drawable.baseline_star_full_36 else R.drawable.baseline_star_border_36,
+                favoritesButtonIcon = if (it.favorites) R.drawable.baseline_star_full_20 else R.drawable.baseline_star_border_20,
                 favoritesButtonColor = Color.Yellow,
                 imageUrl = it.imageUrl
             )

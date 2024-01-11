@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
 import com.android.cameras.app.data.CamerasDataRepoImpl
+import com.android.cameras.app.ui.doors.DoorsState
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +48,7 @@ class CamerasViewModel @AssistedInject constructor(
                     val item = mutableItems[index]
                     mutableItems[index] = item.copy(
                         favorites = item.favorites.not(),
-                        favoritesButtonIcon = if (item.favorites) R.drawable.baseline_star_border_36 else R.drawable.baseline_star_full_36
+                        favoritesButtonIcon = if (item.favorites) R.drawable.baseline_star_border_20 else R.drawable.baseline_star_full_20
                     )
 
                     val newData = currentState.data.toMutableMap()
@@ -58,6 +59,21 @@ class CamerasViewModel @AssistedInject constructor(
                 is CamerasState.Loading -> {}
                 is CamerasState.Error -> {}
                 else -> {}
+            }
+        }
+    }
+
+    fun refreshData() {
+        _state.value = CamerasState.Refresh
+        viewModelScope.launch {
+            async(Dispatchers.IO) {
+                dataRepo.refreshData()
+            }.apply {
+                try {
+                    _state.value = CamerasState.Content(camerasUiModelMapper(this.await()))
+                } catch (e: RuntimeException) {
+                    _state.value = CamerasState.Error(e.message ?: "Something goes wrong")
+                }
             }
         }
     }

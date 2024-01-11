@@ -3,6 +3,8 @@ package com.android.cameras.app.data
 import com.android.cameras.app.data.bd.DbRepoImpl
 import com.android.cameras.app.data.network.NetworkRepoImpl
 import com.android.cameras.app.domain.CameraModel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class CamerasDataRepoImpl @Inject constructor(
@@ -15,13 +17,21 @@ class CamerasDataRepoImpl @Inject constructor(
 
         return if (bdData.isEmpty()) {
             val newData = networkRepo.getAllCameras()
-            bdRepo.saveAllCameras(newData)
+            coroutineScope {
+                launch {
+                    bdRepo.saveAllCameras(newData)
+                }
+            }
             newData
         } else {
             val apiData = networkRepo.getAllCameras()
             val bdIds = bdRepo.findAllCamerasIds()
             val newData = apiData.filter { bdIds.contains(it.id).not() }
-            bdRepo.saveAllCameras(newData)
+            coroutineScope {
+                launch {
+                    bdRepo.saveAllCameras(newData)
+                }
+            }
             bdData + newData
         }
     }

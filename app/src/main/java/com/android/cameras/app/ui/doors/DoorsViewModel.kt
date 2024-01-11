@@ -46,7 +46,7 @@ class DoorsViewModel @AssistedInject constructor(
                     val item = mutableItems[index]
                     mutableItems[index] = item.copy(
                         favorites = item.favorites.not(),
-                        favoritesButtonIcon = if (item.favorites) R.drawable.baseline_star_border_36 else R.drawable.baseline_star_full_36
+                        favoritesButtonIcon = if (item.favorites) R.drawable.baseline_star_border_20 else R.drawable.baseline_star_full_20
                     )
 
                     _state.value = DoorsState.Content(data = mutableItems)
@@ -70,7 +70,7 @@ class DoorsViewModel @AssistedInject constructor(
                 val mutableItems = currentState.data.toMutableList()
                 val index = mutableItems.indexOfFirst { it.id == id }
                 val item = mutableItems[index]
-                mutableItems[index] = item.copy(name = item.name)
+                mutableItems[index] = item.copy(name = name)
 
                 _state.value = DoorsState.Content(data = mutableItems)
             }
@@ -78,6 +78,21 @@ class DoorsViewModel @AssistedInject constructor(
             is DoorsState.Loading -> {}
             is DoorsState.Error -> {}
             else -> {}
+        }
+    }
+
+    fun refreshData() {
+        _state.value = DoorsState.Refresh
+        viewModelScope.launch {
+            async(Dispatchers.IO) {
+                dataRepo.refreshData()
+            }.apply {
+                try {
+                    _state.value = DoorsState.Content(doorsUiModelMapper(this.await()))
+                } catch (e: RuntimeException) {
+                    _state.value = DoorsState.Error(e.message ?: "Something goes wrong")
+                }
+            }
         }
     }
 

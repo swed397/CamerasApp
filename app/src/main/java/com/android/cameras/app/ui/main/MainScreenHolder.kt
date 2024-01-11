@@ -1,5 +1,6 @@
 package com.android.cameras.app.ui.main
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,6 +35,7 @@ fun MainScreenHolder() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(colorResource(id = R.color.light_grey))
     ) {
         TopBarTitle()
         CamerasTab()
@@ -45,7 +49,7 @@ private fun TopBarTitle() {
         fontSize = 21.sp,
         textAlign = TextAlign.Center,
         modifier = Modifier
-            .padding(top = 60.dp)
+            .padding(top = 40.dp)
             .fillMaxWidth()
     )
 }
@@ -57,7 +61,7 @@ private fun CamerasTab() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 46.dp)
+            .padding(top = 36.dp)
     ) {
     }
     TabRow(
@@ -66,17 +70,24 @@ private fun CamerasTab() {
             CameraType.DOORS -> 1
         }
     ) {
-        Tab(text = { Text(stringResource(id = R.string.camera_type_cameras)) },
+        Tab(
+            text = { TabText(text = stringResource(id = R.string.camera_type_cameras)) },
             selected = cameraTypeState == CameraType.CAMERAS,
             onClick = {
                 cameraTypeState = CameraType.CAMERAS
-            }
+            },
+            modifier = Modifier
+                .background(colorResource(id = R.color.light_grey))
         )
-        Tab(text = { Text(stringResource(id = R.string.camera_type_doors)) },
+        Tab(
+            text = { TabText(text = stringResource(id = R.string.camera_type_doors)) },
             selected = cameraTypeState == CameraType.DOORS,
             onClick = {
                 cameraTypeState = CameraType.DOORS
-            }
+            },
+            modifier = Modifier
+                .background(colorResource(id = R.color.light_grey))
+
         )
     }
 
@@ -84,6 +95,15 @@ private fun CamerasTab() {
         CameraType.CAMERAS -> CamerasScreenHolder()
         CameraType.DOORS -> DoorsScreenHolder()
     }
+}
+
+@Composable
+private fun TabText(text: String) {
+    Text(
+        text = text,
+        color = Color.Black,
+        fontSize = 17.sp
+    )
 }
 
 @Composable

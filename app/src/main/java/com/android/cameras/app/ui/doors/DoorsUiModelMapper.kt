@@ -13,7 +13,7 @@ class DoorsUiModelMapper @Inject constructor() {
                 room = it.room ?: "",
                 name = it.name,
                 favorites = it.favorites,
-                favoritesButtonIcon = if (it.favorites) R.drawable.baseline_star_full_36 else R.drawable.baseline_star_border_36,
+                favoritesButtonIcon = if (it.favorites) R.drawable.baseline_star_full_20 else R.drawable.baseline_star_border_20,
                 imageUrl = it.imgUrl,
                 borderCornerShapePercent = if (it.imgUrl.isNullOrEmpty()) 20 else 5
             )

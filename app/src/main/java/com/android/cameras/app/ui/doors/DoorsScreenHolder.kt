@@ -2,10 +2,7 @@ package com.android.cameras.app.ui.doors
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +20,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -38,10 +39,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,17 +63,21 @@ import com.android.cameras.app.App
 import com.android.cameras.app.R
 import com.android.cameras.app.di.injectedViewModel
 import com.android.cameras.app.dipToPx
+import com.android.cameras.app.ui.cameras.CamerasState
+import com.android.cameras.app.ui.theme.CircleIcon
+import com.android.cameras.app.ui.theme.ErrorWindow
 import com.android.cameras.app.ui.theme.Preloader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DoorsScreenHolder() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Gray)
+            .background(colorResource(id = R.color.light_grey))
     ) {
         val context = LocalContext.current.applicationContext
         val viewModel = injectedViewModel {
@@ -79,7 +85,17 @@ fun DoorsScreenHolder() {
         }
         val state by viewModel.state.observeAsState()
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = state is DoorsState.Refresh,
+            onRefresh = viewModel::refreshData
+        )
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
+        ) {
             when (val currentState = state) {
                 is DoorsState.Content -> DoorsList(
                     state = currentState,
@@ -87,10 +103,21 @@ fun DoorsScreenHolder() {
                     onChangeName = viewModel::updateNameDoorById
                 )
 
-                is DoorsState.Error -> {}
-                is DoorsState.Loading -> {}
+                is DoorsState.Error -> ErrorWindow(currentState.error)
+                is DoorsState.Loading -> {
+                    Preloader(modifier = Modifier.align(Alignment.Center))
+                }
+
+                DoorsState.Refresh -> {}
+
                 null -> {}
             }
+
+            PullRefreshIndicator(
+                refreshing = state is DoorsState.Refresh,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
         }
     }
 }
@@ -151,16 +178,17 @@ private fun MainItem(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .offset { IntOffset(swipeableState.offset.value.roundToInt(), 0) }
+            .width(333.dp)
+            .shadow(
+                elevation = 10.dp,
+                shape = RoundedCornerShape(doorUiModel.borderCornerShapePercent)
+            )
     ) {
-        Column(
-            modifier = Modifier
-                .width(333.dp)
-                .clip(shape = RoundedCornerShape(doorUiModel.borderCornerShapePercent))
-        ) {
+        Column {
             ImageItem(
                 imageUrl = doorUiModel.imageUrl
             )
-            TextItem(text = doorUiModel.name)
+            TextItem(name = doorUiModel.name)
         }
     }
 }
@@ -208,36 +236,24 @@ fun ButtonIconsRow(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Icon(
-            painter = painterResource(R.drawable.outline_mode_edit_outline_36),
-            contentDescription = null,
-            tint = Color.Blue,
-            modifier = Modifier
-                .padding(end = 9.dp)
-                .border(
-                    border = BorderStroke(1.dp, Color.Black),
-                    shape = RoundedCornerShape(50)
-                )
-                .clickable {
-                    scope.launch { swipeableState.animateTo(0, tween(500, 0)) }
-                    isDialogVisible.value = isDialogVisible.value.not()
-
-                }
+        CircleIcon(
+            icon = painterResource(id = R.drawable.outline_mode_edit_outline_36),
+            iconColor = colorResource(id = R.color.light_blue),
+            onClickable = {
+                scope.launch { swipeableState.animateTo(0, tween(500, 0)) }
+                isDialogVisible.value = isDialogVisible.value.not()
+            }
         )
 
-        Icon(
-            painter = painterResource(doorUiModel.favoritesButtonIcon),
-            contentDescription = null,
-            tint = Color.Yellow,
-            modifier = Modifier
-                .border(
-                    border = BorderStroke(1.dp, Color.Black),
-                    shape = RoundedCornerShape(50)
-                )
-                .clickable {
-                    scope.launch { swipeableState.animateTo(0, tween(500, 0)) }
-                    onChangeFavorite.invoke(doorUiModel.id)
-                }
+        Spacer(modifier = Modifier.width(9.dp))
+
+        CircleIcon(
+            icon = painterResource(doorUiModel.favoritesButtonIcon),
+            iconColor = Color.Yellow,
+            onClickable = {
+                scope.launch { swipeableState.animateTo(0, tween(500, 0)) }
+                onChangeFavorite.invoke(doorUiModel.id)
+            }
         )
 
         EditDialog(
@@ -269,16 +285,16 @@ private fun ImageItem(imageUrl: String?) {
 }
 
 @Composable
-private fun TextItem(text: String) {
+private fun TextItem(name: String) {
     Box {
         Text(
-            text = text,
+            text = name,
             textAlign = TextAlign.Start,
             fontSize = 17.sp,
             modifier = Modifier
                 .height(72.dp)
                 .fillMaxWidth()
-                .background(Color.Green)
+                .background(colorResource(id = R.color.white))
                 .wrapContentHeight(align = Alignment.CenterVertically)
                 .padding(start = 16.dp)
         )
@@ -286,7 +302,7 @@ private fun TextItem(text: String) {
         Icon(
             painter = painterResource(id = R.drawable.baseline_lock_outline_24),
             contentDescription = null,
-            tint = Color.Blue,
+            tint = colorResource(id = R.color.light_blue),
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 27.dp)
@@ -366,7 +382,7 @@ private fun DoorsScreenPreview() {
             room = "room 1",
             favorites = true,
             imageUrl = "",
-            favoritesButtonIcon = R.drawable.baseline_star_border_36,
+            favoritesButtonIcon = R.drawable.baseline_star_border_20,
             borderCornerShapePercent = 20
         ),
         DoorUiModel(
@@ -375,7 +391,7 @@ private fun DoorsScreenPreview() {
             room = "room 1",
             favorites = true,
             imageUrl = "",
-            favoritesButtonIcon = R.drawable.baseline_star_border_36,
+            favoritesButtonIcon = R.drawable.baseline_star_border_20,
             borderCornerShapePercent = 20
         ),
         DoorUiModel(
@@ -384,7 +400,7 @@ private fun DoorsScreenPreview() {
             room = "room 2",
             favorites = true,
             imageUrl = "",
-            favoritesButtonIcon = R.drawable.baseline_star_border_36,
+            favoritesButtonIcon = R.drawable.baseline_star_border_20,
             borderCornerShapePercent = 20
         )
     )
