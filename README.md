@@ -29,11 +29,7 @@ http://cars.cprogroup.ru/api/rubetek/doors/ - Метод получение дв
 
 # The application implements:
 
-<img src="https://github.com/swed397/CamerasApp/assets/28994194/ed40f0fe-e796-42d7-9d65-6eada9f52e57" width="200" height="400" />
-![photo_5264957270524024352_y](https://github.com/swed397/CamerasApp/assets/28994194/aca816a0-7860-4202-aa80-678df5eb513f)
-![photo_5264957270524024351_y](https://github.com/swed397/CamerasApp/assets/28994194/cb8bd906-38e5-41b6-9ec9-a74aaa67430c)
-![photo_5264957270524024350_y](https://github.com/swed397/CamerasApp/assets/28994194/79c61923-589d-4479-bd5e-d9e1c9e5b811)
-![photo_5264957270524024349_y](https://github.com/swed397/CamerasApp/assets/28994194/60ec9591-9e83-4443-8f19-3a3eb7d42ae1)
+<img src="https://github.com/swed397/CamerasApp/assets/28994194/ed40f0fe-e796-42d7-9d65-6eada9f52e57" width="200" height="400" /><img src="https://github.com/swed397/CamerasApp/assets/28994194/aca816a0-7860-4202-aa80-678df5eb513f" width="200" height="400" /><img src="https://github.com/swed397/CamerasApp/assets/28994194/cb8bd906-38e5-41b6-9ec9-a74aaa67430c" width="200" height="400" /><img src="https://github.com/swed397/CamerasApp/assets/28994194/79c61923-589d-4479-bd5e-d9e1c9e5b811" width="200" height="400" /><img src="https://github.com/swed397/CamerasApp/assets/28994194/60ec9591-9e83-4443-8f19-3a3eb7d42ae1" width="200" height="400" />
 
 https://github.com/swed397/CamerasApp/assets/28994194/13c0da92-85d5-44ee-822c-faa938c05adf
 
