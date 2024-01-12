@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
-            CamerasAppTheme {
+            CamerasAppTheme(darkTheme = false) {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
