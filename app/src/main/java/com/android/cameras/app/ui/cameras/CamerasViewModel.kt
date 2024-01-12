@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
-import com.android.cameras.app.data.CamerasDataRepoImpl
+import com.android.cameras.app.domain.CamerasDataInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +13,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class CamerasViewModel @AssistedInject constructor(
-    private val dataRepo: CamerasDataRepoImpl,
+    private val dataInteractor: CamerasDataInteractor,
     private val camerasUiModelMapper: CamerasUiModelMapper
 ) : ViewModel() {
 
@@ -21,9 +21,10 @@ class CamerasViewModel @AssistedInject constructor(
     val state: LiveData<CamerasState> = _state
 
     init {
+        _state.value = CamerasState.Loading
         viewModelScope.launch {
             async(Dispatchers.IO) {
-                dataRepo.getAllData()
+                dataInteractor.getAllData()
             }.apply {
                 try {
                     _state.value = CamerasState.Content(camerasUiModelMapper(this.await()))
@@ -37,7 +38,7 @@ class CamerasViewModel @AssistedInject constructor(
     fun updateFavoriteCameraById(id: Long, key: String) {
         viewModelScope.launch {
             launch(Dispatchers.IO) {
-                dataRepo.updateFavoriteCameraById(id)
+                dataInteractor.updateFavoriteById(id)
             }
             when (val currentState = _state.value) {
                 is CamerasState.Content -> {
@@ -65,7 +66,7 @@ class CamerasViewModel @AssistedInject constructor(
         _state.value = CamerasState.Refresh
         viewModelScope.launch {
             async(Dispatchers.IO) {
-                dataRepo.refreshData()
+                dataInteractor.refreshData()
             }.apply {
                 try {
                     _state.value = CamerasState.Content(camerasUiModelMapper(this.await()))

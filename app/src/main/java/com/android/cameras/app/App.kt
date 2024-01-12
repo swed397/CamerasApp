@@ -1,10 +1,10 @@
 package com.android.cameras.app
 
 import android.app.Application
-import com.android.cameras.app.data.CamerasDataRepoImpl
-import com.android.cameras.app.data.DoorsDataRepoImpl
-import com.android.cameras.app.di.AppComponent
-import com.android.cameras.app.di.DaggerAppComponent
+import com.android.cameras.app.data.CamerasDataInteractorImpl
+import com.android.cameras.app.data.DoorsDataInteractorImpl
+import com.android.cameras.app.di.components.AppComponent
+import com.android.cameras.app.di.components.DaggerAppComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -16,10 +16,10 @@ class App : Application() {
     lateinit var appComponent: AppComponent
 
     @Inject
-    lateinit var camerasDataRepo: CamerasDataRepoImpl
+    lateinit var camerasDataRepo: CamerasDataInteractorImpl
 
     @Inject
-    lateinit var doorsDataRepo: DoorsDataRepoImpl
+    lateinit var doorsDataRepo: DoorsDataInteractorImpl
 
     override fun onCreate() {
         super.onCreate()

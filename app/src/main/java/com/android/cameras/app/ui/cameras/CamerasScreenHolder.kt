@@ -52,7 +52,6 @@ import com.android.cameras.app.App
 import com.android.cameras.app.R
 import com.android.cameras.app.di.injectedViewModel
 import com.android.cameras.app.dipToPx
-import com.android.cameras.app.ui.doors.DoorsState
 import com.android.cameras.app.ui.theme.CircleIcon
 import com.android.cameras.app.ui.theme.ErrorWindow
 import com.android.cameras.app.ui.theme.Preloader
@@ -70,7 +69,8 @@ fun CamerasScreenHolder() {
     ) {
         val context = LocalContext.current.applicationContext
         val viewModel = injectedViewModel {
-            (context as App).appComponent.camerasViewModelFactory.create()
+            (context as App).appComponent.camerasComponent()
+                .build().camerasViewModelFactory.create()
         }
         val state by viewModel.state.observeAsState()
 

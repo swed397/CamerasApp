@@ -1,4 +1,4 @@
-package com.android.cameras.app.di
+package com.android.cameras.app.di.modules
 
 import dagger.Module
 import dagger.Provides

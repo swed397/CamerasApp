@@ -80,7 +80,7 @@ fun DoorsScreenHolder() {
     ) {
         val context = LocalContext.current.applicationContext
         val viewModel = injectedViewModel {
-            (context as App).appComponent.doorsViewModelFactory.create()
+            (context as App).appComponent.doorsComponent().build().doorsViewModelFactory.create()
         }
         val state by viewModel.state.observeAsState()
 

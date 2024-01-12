@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
-import com.android.cameras.app.data.DoorsDataRepoImpl
+import com.android.cameras.app.domain.DoorsDataInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +13,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class DoorsViewModel @AssistedInject constructor(
-    private val dataRepo: DoorsDataRepoImpl,
+    private val dataInteractor: DoorsDataInteractor,
     private val doorsUiModelMapper: DoorsUiModelMapper
 ) : ViewModel() {
 
@@ -21,9 +21,10 @@ class DoorsViewModel @AssistedInject constructor(
     val state: LiveData<DoorsState> = _state
 
     init {
+        _state.value = DoorsState.Loading
         viewModelScope.launch {
             async(Dispatchers.IO) {
-                dataRepo.getAllData()
+                dataInteractor.getAllData()
             }.apply {
                 try {
                     _state.value = DoorsState.Content(doorsUiModelMapper(this.await()))
@@ -37,7 +38,7 @@ class DoorsViewModel @AssistedInject constructor(
     fun updateFavoriteDoorById(id: Long) {
         viewModelScope.launch {
             launch(Dispatchers.IO) {
-                dataRepo.updateFavoriteDoorById(id)
+                dataInteractor.updateFavoriteById(id)
             }
             when (val currentState = _state.value) {
                 is DoorsState.Content -> {
@@ -62,7 +63,7 @@ class DoorsViewModel @AssistedInject constructor(
     fun updateNameDoorById(id: Long, name: String) {
         viewModelScope.launch {
             launch(Dispatchers.IO) {
-                dataRepo.updateNameDoorById(id, name)
+                dataInteractor.updateNameDoorById(id, name)
             }
         }
         when (val currentState = _state.value) {
@@ -85,7 +86,7 @@ class DoorsViewModel @AssistedInject constructor(
         _state.value = DoorsState.Refresh
         viewModelScope.launch {
             async(Dispatchers.IO) {
-                dataRepo.refreshData()
+                dataInteractor.refreshData()
             }.apply {
                 try {
                     _state.value = DoorsState.Content(doorsUiModelMapper(this.await()))

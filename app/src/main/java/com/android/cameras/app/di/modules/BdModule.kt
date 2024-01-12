@@ -1,4 +1,4 @@
-package com.android.cameras.app.di
+package com.android.cameras.app.di.modules
 
 import com.android.cameras.app.data.bd.model.CameraDbModel
 import com.android.cameras.app.data.bd.model.DoorDbModel
@@ -20,4 +20,6 @@ class BdModule {
 
         return Realm.open(config)
     }
+
+
 }
