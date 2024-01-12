@@ -23,14 +23,14 @@ class CamerasViewModel @AssistedInject constructor(
     init {
         _state.value = CamerasState.Loading
         viewModelScope.launch {
-            async(Dispatchers.IO) {
+            val result = async(Dispatchers.IO) {
                 dataInteractor.getAllData()
-            }.apply {
-                try {
-                    _state.value = CamerasState.Content(camerasUiModelMapper(this.await()))
-                } catch (e: RuntimeException) {
-                    _state.value = CamerasState.Error(e.message ?: "Something goes wrong")
-                }
+            }
+
+            try {
+                _state.value = CamerasState.Content(camerasUiModelMapper(result.await()))
+            } catch (e: RuntimeException) {
+                _state.value = CamerasState.Error(e.message ?: "Something goes wrong")
             }
         }
     }

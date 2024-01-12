@@ -23,15 +23,16 @@ class DoorsViewModel @AssistedInject constructor(
     init {
         _state.value = DoorsState.Loading
         viewModelScope.launch {
-            async(Dispatchers.IO) {
+            val result = async(Dispatchers.IO) {
                 dataInteractor.getAllData()
-            }.apply {
-                try {
-                    _state.value = DoorsState.Content(doorsUiModelMapper(this.await()))
-                } catch (e: RuntimeException) {
-                    _state.value = DoorsState.Error(e.message ?: "Something goes wrong")
-                }
             }
+
+            try {
+                _state.value = DoorsState.Content(doorsUiModelMapper(result.await()))
+            } catch (e: RuntimeException) {
+                _state.value = DoorsState.Error(e.message ?: "Something goes wrong")
+            }
+
         }
     }
 
