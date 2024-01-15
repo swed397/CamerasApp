@@ -19,9 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val context = LocalContext.current.applicationContext
-            val viewModel = injectedViewModel {
-                (context as App).appComponent.mainViewModelFactory.create()
-            }
+            injectedViewModel { (context as App).appComponent.mainViewModelFactory.create() }
 
             CamerasAppTheme(darkTheme = false) {
                 Surface(
