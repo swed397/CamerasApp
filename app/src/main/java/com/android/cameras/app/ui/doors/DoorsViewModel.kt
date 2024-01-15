@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
 import com.android.cameras.app.domain.interactors.DoorsDataInteractor
-import com.android.cameras.app.ui.cameras.CamerasState
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException

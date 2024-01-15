@@ -1,9 +1,7 @@
 package com.android.cameras.app.domain.interactors.impl
 
-import com.android.cameras.app.data.bd.DbRepoImpl
-import com.android.cameras.app.data.network.NetworkRepoImpl
-import com.android.cameras.app.domain.models.CameraModel
 import com.android.cameras.app.domain.interactors.CamerasDataInteractor
+import com.android.cameras.app.domain.models.CameraModel
 import com.android.cameras.app.domain.repo.DbRepo
 import com.android.cameras.app.domain.repo.NetworkRepo
 import kotlinx.coroutines.coroutineScope
