@@ -1,8 +1,8 @@
 package com.android.cameras.app.di.modules
 
-import com.android.cameras.app.data.DoorsDataInteractorImpl
+import com.android.cameras.app.domain.interactors.impl.DoorsDataInteractorImpl
 import com.android.cameras.app.di.scopes.DoorsScope
-import com.android.cameras.app.domain.DoorsDataInteractor
+import com.android.cameras.app.domain.interactors.DoorsDataInteractor
 import dagger.Binds
 import dagger.Module
 

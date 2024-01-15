@@ -1,16 +1,16 @@
-package com.android.cameras.app.data
+package com.android.cameras.app.domain.interactors.impl
 
-import com.android.cameras.app.data.bd.DbRepoImpl
-import com.android.cameras.app.data.network.NetworkRepoImpl
-import com.android.cameras.app.domain.DoorModel
-import com.android.cameras.app.domain.DoorsDataInteractor
+import com.android.cameras.app.domain.interactors.DoorsDataInteractor
+import com.android.cameras.app.domain.models.DoorModel
+import com.android.cameras.app.domain.repo.DbRepo
+import com.android.cameras.app.domain.repo.NetworkRepo
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class DoorsDataInteractorImpl @Inject constructor(
-    private val networkRepo: NetworkRepoImpl,
-    private val bdRepo: DbRepoImpl
+    private val networkRepo: NetworkRepo,
+    private val bdRepo: DbRepo
 ) : DoorsDataInteractor {
 
     override suspend fun refreshData(): List<DoorModel> {
@@ -38,13 +38,6 @@ class DoorsDataInteractorImpl @Inject constructor(
     }
 
     override suspend fun getAllData(): List<DoorModel> = bdRepo.findAllDoors()
-
-    override suspend fun populateBdData() {
-        bdRepo.findAllDoors().ifEmpty {
-            val data = networkRepo.getAllDoors()
-            bdRepo.saveAllDoors(data)
-        }
-    }
 
     override suspend fun updateFavoriteById(id: Long) {
         bdRepo.updateFavoriteDoorById(id)

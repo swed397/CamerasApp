@@ -70,50 +70,63 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DoorsScreenHolder() {
+    val context = LocalContext.current.applicationContext
+    val viewModel = injectedViewModel {
+        (context as App).appComponent.doorsComponent().build().doorsViewModelFactory.create()
+    }
+    val state by viewModel.state.observeAsState()
+
+    DoorsScreen(
+        state,
+        viewModel::refreshData,
+        viewModel::updateFavoriteDoorById,
+        viewModel::updateNameDoorById
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun DoorsScreen(
+    state: DoorsState?,
+    onRefreshData: () -> Unit,
+    onUpdateFavoriteDoorById: (Long) -> Unit,
+    onUpdateNameDoorById: (Long, String) -> Unit
+) {
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = state?.isRefreshing == true,
+        onRefresh = onRefreshData
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.light_grey))
     ) {
-        val context = LocalContext.current.applicationContext
-        val viewModel = injectedViewModel {
-            (context as App).appComponent.doorsComponent().build().doorsViewModelFactory.create()
-        }
-        val state by viewModel.state.observeAsState()
-
-        val pullRefreshState = rememberPullRefreshState(
-            refreshing = state is DoorsState.Refresh,
-            onRefresh = viewModel::refreshData
-        )
-
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
                 .pullRefresh(pullRefreshState)
         ) {
-            when (val currentState = state) {
+            when (state) {
                 is DoorsState.Content -> DoorsList(
-                    state = currentState,
-                    onChangeFavorite = viewModel::updateFavoriteDoorById,
-                    onChangeName = viewModel::updateNameDoorById
+                    state = state,
+                    onChangeFavorite = onUpdateFavoriteDoorById,
+                    onChangeName = onUpdateNameDoorById
                 )
 
-                is DoorsState.Error -> ErrorWindow(currentState.error)
+                is DoorsState.Error -> ErrorWindow(state.error)
                 is DoorsState.Loading -> {
                     Preloader(modifier = Modifier.align(Alignment.Center))
                 }
-
-                DoorsState.Refresh -> {}
 
                 null -> {}
             }
 
             PullRefreshIndicator(
-                refreshing = state is DoorsState.Refresh,
+                refreshing = state?.isRefreshing == true,
                 state = pullRefreshState,
                 modifier = Modifier.align(Alignment.TopCenter),
             )
@@ -403,5 +416,10 @@ private fun DoorsScreenPreview() {
             borderCornerShapePercent = 20
         )
     )
-    DoorsList(state = DoorsState.Content(data), onChangeFavorite = {}, onChangeName = { _, _ -> })
+    DoorsScreen(
+        state = DoorsState.Content(data, false),
+        onRefreshData = {},
+        onUpdateFavoriteDoorById = { _ -> },
+        onUpdateNameDoorById = { _, _ -> }
+    )
 }

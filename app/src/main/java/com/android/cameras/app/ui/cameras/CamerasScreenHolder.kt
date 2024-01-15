@@ -59,25 +59,34 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CamerasScreenHolder() {
+    val context = LocalContext.current.applicationContext
+    val viewModel = injectedViewModel {
+        (context as App).appComponent.camerasComponent()
+            .build().camerasViewModelFactory.create()
+    }
+    val state by viewModel.state.observeAsState()
+
+    CamerasScreen(state, viewModel::refreshData, viewModel::updateFavoriteCameraById)
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun CamerasScreen(
+    state: CamerasState?,
+    onRefreshData: () -> Unit,
+    onUpdateFavorite: (Long, String) -> Unit
+) {
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = state?.isRefreshing == true,
+        onRefresh = onRefreshData
+    )
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.light_grey))
     ) {
-        val context = LocalContext.current.applicationContext
-        val viewModel = injectedViewModel {
-            (context as App).appComponent.camerasComponent()
-                .build().camerasViewModelFactory.create()
-        }
-        val state by viewModel.state.observeAsState()
-
-        val pullRefreshState = rememberPullRefreshState(
-            refreshing = state is CamerasState.Refresh,
-            onRefresh = viewModel::refreshData
-        )
 
         Box(
             modifier = Modifier
@@ -85,10 +94,10 @@ fun CamerasScreenHolder() {
                 .pullRefresh(pullRefreshState)
 
         ) {
-            when (val currentState = state) {
+            when (state) {
                 is CamerasState.Content -> CamerasList(
-                    state = currentState,
-                    onChangeFavorite = viewModel::updateFavoriteCameraById
+                    state = state,
+                    onChangeFavorite = onUpdateFavorite
                 )
 
                 is CamerasState.Loading -> Preloader(
@@ -97,14 +106,13 @@ fun CamerasScreenHolder() {
                     )
                 )
 
-                is CamerasState.Error -> ErrorWindow(error = currentState.error)
-                is CamerasState.Refresh -> {}
+                is CamerasState.Error -> ErrorWindow(error = state.error)
 
                 else -> {}
             }
 
             PullRefreshIndicator(
-                refreshing = state is CamerasState.Refresh,
+                refreshing = state?.isRefreshing == true,
                 state = pullRefreshState,
                 modifier = Modifier.align(Alignment.TopCenter),
             )
@@ -339,5 +347,8 @@ fun CamerasScreenPreview() {
             )
         )
     )
-    CamerasList(state = CamerasState.Content(items), onChangeFavorite = { _, _ -> })
+    CamerasScreen(
+        state = CamerasState.Content(items, false),
+        onRefreshData = {},
+        onUpdateFavorite = { _, _ -> })
 }

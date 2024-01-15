@@ -5,12 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
-import com.android.cameras.app.domain.CamerasDataInteractor
+import com.android.cameras.app.domain.interactors.CamerasDataInteractor
+import com.android.cameras.app.ui.doors.DoorsState
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 class CamerasViewModel @AssistedInject constructor(
     private val dataInteractor: CamerasDataInteractor,
@@ -28,7 +30,12 @@ class CamerasViewModel @AssistedInject constructor(
             }
 
             try {
-                _state.value = CamerasState.Content(camerasUiModelMapper(result.await()))
+                _state.value = CamerasState.Content(
+                    data = camerasUiModelMapper(result.await()),
+                    isRefreshing = false
+                )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: RuntimeException) {
                 _state.value = CamerasState.Error(e.message ?: "Something goes wrong")
             }
@@ -52,7 +59,7 @@ class CamerasViewModel @AssistedInject constructor(
 
                     val newData = currentState.data.toMutableMap()
                     newData[key] = mutableItems
-                    _state.value = CamerasState.Content(data = newData)
+                    _state.value = CamerasState.Content(data = newData, isRefreshing = false)
                 }
 
                 is CamerasState.Loading -> {}
@@ -63,16 +70,25 @@ class CamerasViewModel @AssistedInject constructor(
     }
 
     fun refreshData() {
-        _state.value = CamerasState.Refresh
+        _state.value = when (val currentState = _state.value) {
+            is CamerasState.Content -> currentState.copy(isRefreshing = true)
+            else -> currentState
+        }
+
         viewModelScope.launch {
-            async(Dispatchers.IO) {
+            val result = async(Dispatchers.IO) {
                 dataInteractor.refreshData()
-            }.apply {
-                try {
-                    _state.value = CamerasState.Content(camerasUiModelMapper(this.await()))
-                } catch (e: RuntimeException) {
-                    _state.value = CamerasState.Error(e.message ?: "Something goes wrong")
-                }
+            }
+
+            try {
+                _state.value = CamerasState.Content(
+                    data = camerasUiModelMapper(result.await()),
+                    isRefreshing = false
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: RuntimeException) {
+                _state.value = CamerasState.Error(e.message ?: "Something goes wrong")
             }
         }
     }

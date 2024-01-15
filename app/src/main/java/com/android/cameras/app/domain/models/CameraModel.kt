@@ -1,4 +1,4 @@
-package com.android.cameras.app.domain
+package com.android.cameras.app.domain.models
 
 data class CameraModel(
     val id: Long,

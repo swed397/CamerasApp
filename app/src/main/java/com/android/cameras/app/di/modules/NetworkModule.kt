@@ -1,5 +1,8 @@
 package com.android.cameras.app.di.modules
 
+import com.android.cameras.app.data.network.NetworkRepoImpl
+import com.android.cameras.app.domain.repo.NetworkRepo
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import io.ktor.client.HttpClient
@@ -13,7 +16,7 @@ import io.ktor.client.features.logging.Logging
 import javax.inject.Singleton
 
 
-@Module
+@Module(includes = [NetworkModule.BindModule::class])
 class NetworkModule {
 
     @Provides
@@ -26,5 +29,11 @@ class NetworkModule {
             logger = Logger.DEFAULT
             level = LogLevel.ALL
         }
+    }
+
+    @Module
+    internal interface BindModule {
+        @Binds
+        fun bindNetworkRepo(networkRepoImpl: NetworkRepoImpl): NetworkRepo
     }
 }

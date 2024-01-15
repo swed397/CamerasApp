@@ -2,7 +2,7 @@ package com.android.cameras.app.ui.cameras
 
 import androidx.compose.ui.graphics.Color
 import com.android.cameras.app.R
-import com.android.cameras.app.domain.CameraModel
+import com.android.cameras.app.domain.models.CameraModel
 import javax.inject.Inject
 
 class CamerasUiModelMapper @Inject constructor() {

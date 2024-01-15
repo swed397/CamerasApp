@@ -5,9 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.cameras.app.R
-import com.android.cameras.app.domain.DoorsDataInteractor
+import com.android.cameras.app.domain.interactors.DoorsDataInteractor
+import com.android.cameras.app.ui.cameras.CamerasState
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -28,7 +30,12 @@ class DoorsViewModel @AssistedInject constructor(
             }
 
             try {
-                _state.value = DoorsState.Content(doorsUiModelMapper(result.await()))
+                _state.value = DoorsState.Content(
+                    data = doorsUiModelMapper(result.await()),
+                    isRefreshing = false
+                )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: RuntimeException) {
                 _state.value = DoorsState.Error(e.message ?: "Something goes wrong")
             }
@@ -51,7 +58,7 @@ class DoorsViewModel @AssistedInject constructor(
                         favoritesButtonIcon = if (item.favorites) R.drawable.baseline_star_border_20 else R.drawable.baseline_star_full_20
                     )
 
-                    _state.value = DoorsState.Content(data = mutableItems)
+                    _state.value = DoorsState.Content(data = mutableItems, isRefreshing = false)
                 }
 
                 is DoorsState.Loading -> {}
@@ -74,7 +81,7 @@ class DoorsViewModel @AssistedInject constructor(
                 val item = mutableItems[index]
                 mutableItems[index] = item.copy(name = name)
 
-                _state.value = DoorsState.Content(data = mutableItems)
+                _state.value = DoorsState.Content(data = mutableItems, isRefreshing = false)
             }
 
             is DoorsState.Loading -> {}
@@ -84,16 +91,22 @@ class DoorsViewModel @AssistedInject constructor(
     }
 
     fun refreshData() {
-        _state.value = DoorsState.Refresh
+        _state.value = when (val currentState = _state.value) {
+            is DoorsState.Content -> currentState.copy(isRefreshing = true)
+            else -> currentState
+        }
+
         viewModelScope.launch {
-            async(Dispatchers.IO) {
+            val result = async(Dispatchers.IO) {
                 dataInteractor.refreshData()
-            }.apply {
-                try {
-                    _state.value = DoorsState.Content(doorsUiModelMapper(this.await()))
-                } catch (e: RuntimeException) {
-                    _state.value = DoorsState.Error(e.message ?: "Something goes wrong")
-                }
+            }
+            try {
+                _state.value = DoorsState.Content(
+                    data = doorsUiModelMapper(result.await()),
+                    isRefreshing = false
+                )
+            } catch (e: RuntimeException) {
+                _state.value = DoorsState.Error(e.message ?: "Something goes wrong")
             }
         }
     }

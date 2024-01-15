@@ -1,7 +1,7 @@
 package com.android.cameras.app.ui.doors
 
 import com.android.cameras.app.R
-import com.android.cameras.app.domain.DoorModel
+import com.android.cameras.app.domain.models.DoorModel
 import javax.inject.Inject
 
 class DoorsUiModelMapper @Inject constructor() {
